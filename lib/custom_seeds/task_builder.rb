@@ -1,3 +1,4 @@
+require 'custom_seeds/seed_list'
 # This class exercises the Rake API to generate rake tasks based on a given seed file
 # directory.
 #
@@ -17,7 +18,7 @@ module CustomSeeds
   class TaskBuilder
     attr_reader :directory, :rake_dsl
 
-    def initialize(directory: Rails.root.join('db/seeds/'), rake_dsl:)
+    def initialize(rake_dsl:, directory: Rails.root.join('db/seeds/'))
       @directory = directory
       @rake_dsl = rake_dsl
     end
@@ -28,12 +29,9 @@ module CustomSeeds
     end
 
     def build_individual_tasks
-      Dir.glob("#{@directory}/**/*.rb").each do |filename|
-        namespaces = namespaces_for(filename)
-        task_name = taskname_for(filename)
-
-        rake_dsl.send(:task, (namespaces + [task_name]).join(':').intern => :environment) do
-          load(filename)
+      SeedList.new(directory: @directory).each do |seed|
+        rake_dsl.send(:task, seed.name => :environment) do
+          load(seed.filename)
         end
       end
     end
@@ -50,26 +48,6 @@ module CustomSeeds
           load(filename)
         end
       end
-    end
-
-    private
-
-    def inside_namespace(namespaces, &block)
-      return block.call if namespaces.empty?
-
-      rake_dsl.namespace namespaces.shift do
-        inside_namespace(namespaces, &block)
-      end
-    end
-
-    def taskname_for(filename)
-      filename.split('/').last.sub('.rb', '').intern
-    end
-
-    def namespaces_for(filename)
-      parts = filename.sub(@directory.to_s, '').split('/').filter { |part| part != '' }
-
-      parts[0..-2].map(&:intern)
     end
   end
 end

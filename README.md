@@ -21,7 +21,7 @@ Create a seedfile under `db/seeds`:
 ```ruby
 # db/seeds/users/followed_products.rb
 
-SeedFile.define do
+CustomSeeds.define do
   title 'Followed Products'
   description 'Add followed products to user accounts'
 
