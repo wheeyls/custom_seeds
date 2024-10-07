@@ -32,14 +32,14 @@ module CustomSeeds
         namespaces = namespaces_for(filename)
         task_name = taskname_for(filename)
 
-        rake_dsl.task (namespaces + [task_name]).join(':').intern => :environment do
+        rake_dsl.send(:task, (namespaces + [task_name]).join(':').intern => :environment) do
           load(filename)
         end
       end
     end
 
     def build_global_task
-      rake_dsl.task :all, [:directory] => :environment do |_, args|
+      rake_dsl.send(:task, :all, [:directory] => :environment) do |_, args|
         files = if args[:directory]
                   Dir.glob("#{@directory}/#{args[:directory]}/**/*.rb")
                 else

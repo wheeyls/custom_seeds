@@ -5,7 +5,7 @@ namespace :db do
     # This will load all files in db/seeds and create a task for each file
     # The task is named after the full filename and directory name, but with underscores
     # instead of slashes. For example, db/seeds/foo/bar.rb will create a task called
-    # db:seed:foo_bar
+    # db:seed:foo:bar
     CustomSeeds::TaskBuilder.new(rake_dsl: self).build
   end
 end
