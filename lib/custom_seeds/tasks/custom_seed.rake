@@ -7,5 +7,12 @@ namespace :db do
     # instead of slashes. For example, db/seeds/foo/bar.rb will create a task called
     # db:seed:foo:bar
     CustomSeeds::TaskBuilder.new(rake_dsl: self).build
+
+    task :list do
+      puts 'Available seed tasks:'
+      CustomSeeds::SeedList.new.each do |seed|
+        puts seed.name
+      end
+    end
   end
 end
