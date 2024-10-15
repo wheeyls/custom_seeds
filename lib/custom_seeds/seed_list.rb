@@ -13,8 +13,8 @@ module CustomSeeds
       end
     end
 
-    def initialize(directory: Rails.root.join('db/seeds/'))
-      @directory = directory
+    def initialize(directory: nil)
+      @directory = directory || ::Rails.root.join('db/seeds/')
     end
 
     def seeds

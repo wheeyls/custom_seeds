@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'bundler/setup'
+require 'custom_seeds'
+
+# if argv[0] is a directory...
+if !ARGV[0] || File.directory?(ARGV[0])
+  list = CustomSeeds::SeedList.new(directory: ARGV[0])
+  list.each { |seed| load(seed.filename) }
+else
+  # ...otherwise, load the file
+  load ARGV[0]
+end
