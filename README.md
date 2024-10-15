@@ -45,6 +45,18 @@ CustomSeeds.define do
 end
 ```
 
+### CLI
+
+Run seeds using the `rseed` command:
+
+    $ rseed
+    $ rseed db/seeds/users/
+    $ rseed db/seeds/users/followed_products.rb
+
+Run all seeds:
+
+### Rake
+
 Run the file using the rake task:
 
 ```bash
