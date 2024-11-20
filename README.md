@@ -52,6 +52,8 @@ Run seeds using the `rseed` command:
     $ rseed
     $ rseed db/seeds/users/
     $ rseed db/seeds/users/followed_products.rb
+    $ rseed db/seeds/users/followed_products.rb --dry-run
+    $ rseed db/seeds/users/followed_products.rb --verbose
 
 Run all seeds:
 
