@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    custom_seeds (0.1.0)
+    custom_seeds (0.2.0)
       progress_bar (= 1.3.1)
 
 GEM
