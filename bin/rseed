@@ -3,9 +3,27 @@
 
 require 'bundler/setup'
 require 'custom_seeds'
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: rseed [options] FILE'
+
+  opts.on('-v', '--verbose', 'Log all sql commands run') do
+    options[:verbose] = true
+  end
+
+  opts.on('-d', '--dry-run', 'Rollback all changes after test run') do
+    options[:dry_run] = true
+  end
+end.parse!
+
+CustomSeeds::SeedFile.options(options)
+
+file_path = ARGV[0]
 
 # if argv[0] is a directory...
-if !ARGV[0] || File.directory?(ARGV[0])
+if !file_path || File.directory?(file_path)
   list = CustomSeeds::SeedList.new(directory: ARGV[0])
   list.each { |seed| load(seed.filename) }
 else

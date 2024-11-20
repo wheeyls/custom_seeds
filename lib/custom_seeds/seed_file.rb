@@ -17,9 +17,25 @@ module CustomSeeds
     end
 
     def initialize
+      @dry_run = self.class.options[:dry_run]
+      @verbose = self.class.options[:verbose]
       @records = []
       @build_block = ->(_record) { raise 'No build block defined' }
       @log_block = nil
+    end
+
+    def self.options(value = nil)
+      return @options if value.nil?
+
+      @options = value
+    end
+
+    def dry_run?
+      @dry_run
+    end
+
+    def verbose?
+      @verbose
     end
 
     def colorize(string, color_code)
@@ -51,6 +67,12 @@ module CustomSeeds
       @before_block = block
     end
 
+    def after(&block)
+      return @after_block if block.nil?
+
+      @after_block = block
+    end
+
     # memoize block
     def let(name, &block)
       @memoized ||= {}
@@ -76,21 +98,52 @@ module CustomSeeds
       @log_block = block
     end
 
-    def run
-      before&.call
-      progress_bar = ProgressBar.new(records.size)
+    def log_sql_statements(&block)
+      sql_statements = []
+      return block.call unless verbose?
 
-      records.each do |record|
-        build_block.call(record)
-
-        if log_block
-          puts colorize(log_block.call(record), :blue)
-        else
-          progress_bar.increment!
-        end
+      subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |_, _, _, _, details|
+        sql_statements << details[:sql] unless details[:name] == 'SCHEMA'
       end
 
-      puts colorize('✅ Seeding completed', :green)
+      block.call
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber)
+      sql_statements.each { |sql| puts sql }
+    end
+
+    def transaction(&block)
+      puts colorize('🚧 Dry Run. No changes will be applied.', :green) if dry_run?
+
+      ActiveRecord::Base.transaction do
+        block.call
+
+        raise ActiveRecord::Rollback if dry_run?
+      end
+
+      puts colorize('🚧 Dry run complete', :green) if dry_run?
+    end
+
+    def run
+      log_sql_statements do
+        transaction do
+          before&.call
+          progress_bar = ProgressBar.new(records.size)
+
+          records.each do |record|
+            build_block.call(record)
+
+            if log_block
+              puts colorize(log_block.call(record), :blue)
+            else
+              progress_bar.increment!
+            end
+          end
+
+          after&.call
+          puts colorize('✅ Seeding completed', :green)
+        end
+      end
     end
   end
 end
