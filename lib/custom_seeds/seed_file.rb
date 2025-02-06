@@ -25,9 +25,9 @@ module CustomSeeds
     end
 
     def self.options(value = nil)
-      return @options if value.nil?
+      return @options = value if value
 
-      @options = value
+      @options ||= {}
     end
 
     def dry_run?
